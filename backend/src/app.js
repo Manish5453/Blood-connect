@@ -30,6 +30,7 @@ app.use('/api/sos', require('./routes/sosRoutes'));
 app.use('/api/camps', require('./routes/campRoutes'));
 app.use('/api/issuance', require('./routes/issuanceRoutes'));
 app.use('/api/commitments', require('./routes/commitmentRoutes'));
+app.use('/api/analytics', require('./routes/analyticsRoutes'));
 
 // Base route
 app.get('/', (req, res) => {

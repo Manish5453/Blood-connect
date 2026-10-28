@@ -16,15 +16,20 @@ const getCommitments = async (req, res) => {
   }
 };
 
-// Donor commits to help
+// Donor commits to help with actual logged-in user details
 const createCommitment = async (req, res) => {
   try {
     const { hospitalId, hospitalName, bloodGroup, referenceType } = req.body;
 
+    // Ensure logged-in user is a donor
+    if (!req.user || req.user.role !== 'donor') {
+      return res.status(403).json({ message: 'Only registered donors can commit to help.' });
+    }
+
     const commitment = await DonorCommitment.create({
       donor: req.user._id,
-      donorName: req.user.name,
-      donorPhone: req.user.phone || 'N/A',
+      donorName: req.user.name,         // Logs the exact name of currently logged-in donor
+      donorPhone: req.user.phone || 'N/A', // Logs the exact phone number
       bloodGroup: bloodGroup || req.user.bloodGroup || 'A+',
       hospital: hospitalId,
       hospitalName,
@@ -38,7 +43,7 @@ const createCommitment = async (req, res) => {
   }
 };
 
-// Update status (Donor can update 'On the Way' / Hospital can mark 'Donated')
+// Update status
 const updateCommitmentStatus = async (req, res) => {
   try {
     const { status } = req.body;

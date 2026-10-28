@@ -94,6 +94,36 @@ const EmergencySOS = () => {
     }
   };
 
+  // Donor Commit Handler for Donor Tracking Integration
+  const handleDonorCommit = async (sosItem) => {
+    let token = localStorage.getItem('token');
+    if (!token) {
+      const userInfo = localStorage.getItem('userInfo');
+      if (userInfo) token = JSON.parse(userInfo).token;
+    }
+
+    if (!token) {
+      alert('Please log in as a donor to respond to this SOS alert.');
+      return;
+    }
+
+    try {
+      await API.post('/commitments', {
+        hospitalId: sosItem.hospital,
+        hospitalName: sosItem.hospitalName,
+        bloodGroup: sosItem.bloodGroup,
+        referenceType: 'SOS'
+      }, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+
+      alert('🎉 Thank you! Your response has been logged. The hospital can now track your arrival on the Donor Tracking page.');
+    } catch (err) {
+      console.error('Error recording donor commitment:', err.response?.data || err.message);
+      alert(err.response?.data?.message || 'Failed to submit commitment.');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-red-50/30 py-10 px-4 sm:px-6 lg:px-8">
       <div className="max-w-6xl mx-auto">
@@ -133,35 +163,50 @@ const EmergencySOS = () => {
               const isOwner = userRole === 'hospital' && item.hospital === userId;
 
               return (
-                <div key={item._id} className={`bg-white rounded-2xl p-6 shadow-sm border transition ${isResolved ? 'border-gray-200 opacity-70 bg-gray-50' : 'border-red-200 border-l-8 border-l-red-600 shadow-red-100'}`}>
-                  <div className="flex justify-between items-start mb-3">
-                    <div>
-                      <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${isResolved ? 'bg-gray-200 text-gray-700' : 'bg-red-100 text-red-700 animate-pulse'}`}>
-                        {item.status} SOS
+                <div key={item._id} className={`bg-white rounded-2xl p-6 shadow-sm border transition flex flex-col justify-between ${isResolved ? 'border-gray-200 opacity-70 bg-gray-50' : 'border-red-200 border-l-8 border-l-red-600 shadow-red-100'}`}>
+                  <div>
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <span className={`text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wider ${isResolved ? 'bg-gray-200 text-gray-700' : 'bg-red-100 text-red-700 animate-pulse'}`}>
+                          {item.status} SOS
+                        </span>
+                        <h3 className="text-xl font-extrabold text-gray-900 mt-2">{item.hospitalName}</h3>
+                      </div>
+                      <span className="bg-red-600 text-white text-sm font-black px-3.5 py-1.5 rounded-xl shadow">
+                        {item.bloodGroup}
                       </span>
-                      <h3 className="text-xl font-extrabold text-gray-900 mt-2">{item.hospitalName}</h3>
                     </div>
-                    <span className="bg-red-600 text-white text-sm font-black px-3.5 py-1.5 rounded-xl shadow">
-                      {item.bloodGroup}
-                    </span>
+
+                    <div className="space-y-2 text-sm text-gray-700 mb-4">
+                      <p><strong>Units Required:</strong> <span className="text-red-600 font-bold">{item.unitsNeeded} Units</span></p>
+                      <p><strong>City:</strong> {item.city}</p>
+                      <p><strong>Emergency Message:</strong> <span className="text-gray-800 italic">"{item.message}"</span></p>
+                      <p><strong>Contact Helpline:</strong> <a href={`tel:${item.contactPhone}`} className="text-red-600 font-bold underline">{item.contactPhone}</a></p>
+                      <p className="text-xs text-gray-400">Broadcasted on: {new Date(item.createdAt).toLocaleString()}</p>
+                    </div>
                   </div>
 
-                  <div className="space-y-2 text-sm text-gray-700 mb-4">
-                    <p><strong>Units Required:</strong> <span className="text-red-600 font-bold">{item.unitsNeeded} Units</span></p>
-                    <p><strong>City:</strong> {item.city}</p>
-                    <p><strong>Emergency Message:</strong> <span className="text-gray-800 italic">"{item.message}"</span></p>
-                    <p><strong>Contact Helpline:</strong> <a href={`tel:${item.contactPhone}`} className="text-red-600 font-bold underline">{item.contactPhone}</a></p>
-                    <p className="text-xs text-gray-400">Broadcasted on: {new Date(item.createdAt).toLocaleString()}</p>
-                  </div>
+                  {/* Actions */}
+                  <div className="pt-2">
+                    {isOwner && !isResolved && (
+                      <button
+                        onClick={() => handleResolve(item._id)}
+                        className="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2.5 rounded-xl transition shadow"
+                      >
+                        Mark as Resolved / Fulfilled
+                      </button>
+                    )}
 
-                  {isOwner && !isResolved && (
-                    <button
-                      onClick={() => handleResolve(item._id)}
-                      className="w-full bg-green-600 hover:bg-green-700 text-white text-xs font-bold py-2.5 rounded-xl transition shadow"
-                    >
-                      Mark as Resolved / Fulfilled
-                    </button>
-                  )}
+                    {/* Donor Action Button */}
+                    {userRole === 'donor' && !isResolved && (
+                      <button
+                        onClick={() => handleDonorCommit(item)}
+                        className="w-full bg-red-600 hover:bg-red-700 text-white text-sm font-bold py-2.5 rounded-xl transition shadow-md flex items-center justify-center gap-2"
+                      >
+                        🙋 I Want to Donate / Respond to SOS
+                      </button>
+                    )}
+                  </div>
                 </div>
               );
             })}
