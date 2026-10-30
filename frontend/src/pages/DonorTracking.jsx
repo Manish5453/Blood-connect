@@ -97,6 +97,7 @@ const DonorTracking = () => {
 
                     <div className="space-y-2 text-sm text-gray-600 mb-6">
                       <p><strong>Hospital / Venue:</strong> {item.hospitalName}</p>
+                      {item.referenceLabel && <p><strong>{item.referenceType === 'SOS' ? 'Emergency' : 'Blood request'}:</strong> {item.referenceLabel}</p>}
                       <p className="flex items-center gap-1">
                         <Phone className="h-4 w-4 text-red-600" /> 
                         <strong>Contact:</strong> <a href={`tel:${item.donorPhone}`} className="text-red-600 underline">{item.donorPhone}</a>

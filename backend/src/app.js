@@ -16,13 +16,25 @@ const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const app = express();
 
 // Global Middlewares
+const corsOptions = {
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+  ],
+  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+};
+
+// Handle CORS before parsing requests or routing, including browser preflights.
+app.use(cors(corsOptions));
+app.options(/.*/, cors(corsOptions));
 app.use(express.json());
-app.use(cors());
 app.use(helmet());
 app.use(morgan('dev'));
 
 // API Routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/requests', requestRoutes);
 app.use('/api/donors', donorRoutes);
 app.use('/api/inventory', inventoryRoutes);

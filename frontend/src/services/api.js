@@ -1,23 +1,26 @@
 import axios from 'axios';
 
 const API = axios.create({
-  baseURL: 'http://localhost:5000/api',
+  baseURL: 'http://localhost:5001/api',
 });
 
 // Automatically attach JWT token to every request
 API.interceptors.request.use((config) => {
-  let token = localStorage.getItem('token');
-  
-  if (!token) {
-    const userInfo = localStorage.getItem('userInfo');
-    if (userInfo) {
-      try {
-        const parsed = JSON.parse(userInfo);
-        token = parsed.token;
-      } catch (e) {
-        console.error('Error parsing userInfo', e);
-      }
+  let token = null;
+  const isAdminRequest = config.url?.startsWith('/admin/');
+  const storedSession = localStorage.getItem(isAdminRequest ? 'adminInfo' : 'userInfo');
+  if (storedSession) {
+    try {
+      token = JSON.parse(storedSession).token;
+    } catch {
+      localStorage.removeItem(isAdminRequest ? 'adminInfo' : 'userInfo');
     }
+  }
+
+  // Support older sessions, but never let a stale legacy token override the
+  // currently signed-in account stored in the relevant session record.
+  if (!token && !storedSession && !isAdminRequest) {
+    token = localStorage.getItem('token');
   }
 
   if (token) {

@@ -4,17 +4,22 @@ const SOSAlert = require('../models/SOSAlert');
 
 const getDashboardAnalytics = async (req, res) => {
   try {
-    // Ensure user is authorized and is a hospital
-    if (!req.user || req.user.role !== 'hospital') {
-      return res.status(403).json({ message: 'Access denied. Hospital role required.' });
+    if (!req.user) {
+      return res.status(401).json({ message: 'Sign in to view analytics.' });
     }
 
-    const hospitalId = req.user._id;
+    // Hospitals see their own operational data. Other signed-in accounts get
+    // network-wide totals only; no patient or donor details are exposed here.
+    const isHospital = req.user.role === 'hospital';
+    const inventoryFilter = isHospital ? { hospital: req.user._id } : {};
+    const issuanceFilter = isHospital ? { hospital: req.user._id } : {};
+    const sosFilter = { status: 'Active', ...(isHospital ? { hospital: req.user._id } : {}) };
 
-    // Fetch data belonging ONLY to the logged-in hospital
-    const inventory = await Inventory.find({ hospital: hospitalId }) || [];
-    const issuances = await PatientIssuance.find({ hospital: hospitalId }) || [];
-    const activeSos = await SOSAlert.find({ hospital: hospitalId, status: 'Active' }) || [];
+    const [inventory, issuances, activeSos] = await Promise.all([
+      Inventory.find(inventoryFilter),
+      PatientIssuance.find(issuanceFilter),
+      SOSAlert.find(sosFilter),
+    ]);
 
     // Stock per blood group mapping
     const stockByGroup = {
@@ -46,6 +51,7 @@ const getDashboardAnalytics = async (req, res) => {
       totalUnitsInStock,
       totalUnitsIssued,
       activeSosCount: activeSos.length,
+      scope: isHospital ? 'hospital' : 'network',
       stockByGroup,
       shortageGroups
     });

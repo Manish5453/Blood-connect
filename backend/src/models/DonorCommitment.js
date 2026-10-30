@@ -7,6 +7,8 @@ const donorCommitmentSchema = new mongoose.Schema({
   bloodGroup: { type: String, required: true },
   hospital: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
   hospitalName: { type: String, required: true },
+  referenceId: { type: mongoose.Schema.Types.ObjectId, default: null },
+  referenceLabel: { type: String, default: '' },
   status: { 
     type: String, 
     enum: ['Accepted', 'On the Way', 'Donated', 'Cancelled'], 

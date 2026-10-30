@@ -19,17 +19,20 @@ export const AuthProvider = ({ children }) => {
     const { data } = await API.post('/auth/login', { email, password });
     setUser(data);
     localStorage.setItem('userInfo', JSON.stringify(data));
+    localStorage.setItem('token', data.token);
   };
 
   const register = async (userData) => {
     const { data } = await API.post('/auth/register', userData);
     setUser(data);
     localStorage.setItem('userInfo', JSON.stringify(data));
+    localStorage.setItem('token', data.token);
   };
 
   const logout = () => {
     setUser(null);
     localStorage.removeItem('userInfo');
+    localStorage.removeItem('token');
   };
 
   return (

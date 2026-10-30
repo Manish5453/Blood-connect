@@ -11,6 +11,10 @@ const registerUser = async (req, res) => {
   try {
     const { name, email, password, phone, role, bloodGroup, city } = req.body;
 
+    if (role === 'admin') {
+      return res.status(403).json({ message: 'Admin accounts cannot be created through public registration' });
+    }
+
     if (!email || !password || !name) {
       return res.status(400).json({ message: 'Please fill all required fields' });
     }

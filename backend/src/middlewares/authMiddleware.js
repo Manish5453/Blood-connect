@@ -13,6 +13,14 @@ const protect = async (req, res, next) => {
       const secret = process.env.JWT_SECRET || 'blood_connect_super_secret_key_2026';
       
       const decoded = jwt.verify(token, secret);
+
+      // Admin sessions are signed only by the environment-backed admin login.
+      if (decoded.role === 'admin' && decoded.username) {
+        req.admin = true;
+        req.user = { role: 'admin', username: decoded.username };
+        return next();
+      }
+
       req.user = await User.findById(decoded.id).select('-password');
 
       if (!req.user) {
@@ -29,6 +37,13 @@ const protect = async (req, res, next) => {
   }
 };
 
+const requireAdmin = (req, res, next) => {
+  if (!req.admin) {
+    return res.status(403).json({ message: 'Admin access required' });
+  }
+  return next();
+};
+
 const preventAdminAction = (req, res, next) => {
   if (req.user && req.user.role === 'admin') {
     return res.status(403).json({
@@ -38,4 +53,4 @@ const preventAdminAction = (req, res, next) => {
   return next();
 };
 
-module.exports = { protect, preventAdminAction };
+module.exports = { protect, requireAdmin, preventAdminAction };

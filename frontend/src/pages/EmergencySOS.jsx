@@ -109,10 +109,7 @@ const EmergencySOS = () => {
 
     try {
       await API.post('/commitments', {
-        hospitalId: sosItem.hospital,
-        hospitalName: sosItem.hospitalName,
-        bloodGroup: sosItem.bloodGroup,
-        referenceType: 'SOS'
+        sosId: sosItem._id,
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });

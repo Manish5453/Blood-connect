@@ -9,22 +9,14 @@ const AnalyticsDashboard = () => {
 
   useEffect(() => {
     const fetchAnalytics = async () => {
-      let token = localStorage.getItem('token');
-      if (!token) {
-        const userInfo = localStorage.getItem('userInfo');
-        if (userInfo) token = JSON.parse(userInfo).token;
-      }
-
       try {
         setLoading(true);
-        const res = await API.get('/analytics/dashboard', {
-          headers: { Authorization: `Bearer ${token}` }
-        });
+        const res = await API.get('/analytics/dashboard');
         setData(res.data);
       } catch (err) {
         console.error('Error fetching analytics:', err);
         setError(err.response?.data?.message || 'Failed to load analytics data.');
-      } fontFinally: {
+      } finally {
         setLoading(false);
       }
     };
@@ -35,7 +27,7 @@ const AnalyticsDashboard = () => {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <p className="text-gray-500 font-medium animate-pulse">Loading hospital analytics...</p>
+        <p className="text-gray-500 font-medium animate-pulse">Loading blood network analytics...</p>
       </div>
     );
   }
@@ -56,9 +48,9 @@ const AnalyticsDashboard = () => {
       <div className="max-w-6xl mx-auto space-y-8">
         <div>
           <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight flex items-center gap-2">
-            <Activity className="h-8 w-8 text-red-600" /> Hospital Analytics & Shortage Predictor
+            <Activity className="h-8 w-8 text-red-600" /> {data.scope === 'hospital' ? 'Hospital Analytics & Shortage Predictor' : 'Blood Network Analytics'}
           </h1>
-          <p className="text-sm text-gray-500 mt-1">Real-time stock analysis and shortage forecasting dashboard.</p>
+          <p className="text-sm text-gray-500 mt-1">{data.scope === 'hospital' ? 'Real-time stock analysis and shortage forecasting for your hospital.' : 'Live, network-wide blood stock and emergency totals.'}</p>
         </div>
 
         {/* Shortage Warnings */}

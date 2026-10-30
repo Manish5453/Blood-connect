@@ -1,8 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import API from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const BloodRequests = () => {
+  const { user } = useAuth();
   const [requests, setRequests] = useState([]);
+  const [acceptedRequestIds, setAcceptedRequestIds] = useState([]);
+  const [acceptingId, setAcceptingId] = useState('');
   const [showModal, setShowModal] = useState(false);
   const [formData, setFormData] = useState({
     patientName: '',
@@ -25,7 +29,28 @@ const BloodRequests = () => {
 
   useEffect(() => {
     fetchRequests();
-  }, []);
+    if (user?.role === 'donor') {
+      API.get('/commitments')
+        .then(({ data }) => setAcceptedRequestIds(data.filter((item) => item.referenceType === 'General').map((item) => String(item.referenceId))))
+        .catch((err) => console.error('Error fetching donor responses:', err));
+    }
+  }, [user?._id, user?.role]);
+
+  const handleAcceptRequest = async (requestId) => {
+    setAcceptingId(requestId);
+    try {
+      await API.post('/commitments', { requestId });
+      setAcceptedRequestIds((current) => [...current, String(requestId)]);
+    } catch (err) {
+      if (err.response?.status === 409) {
+        setAcceptedRequestIds((current) => [...current, String(requestId)]);
+      } else {
+        alert(err.response?.data?.message || 'Could not accept this request. Please sign in as a donor.');
+      }
+    } finally {
+      setAcceptingId('');
+    }
+  };
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -116,6 +141,16 @@ const BloodRequests = () => {
                     {req.urgencyLevel}
                   </span>
                 </div>
+                {user?.role === 'donor' && (
+                  <button
+                    type="button"
+                    disabled={acceptingId === req._id || acceptedRequestIds.includes(String(req._id))}
+                    onClick={() => handleAcceptRequest(req._id)}
+                    className="mt-4 w-full rounded-xl bg-red-600 px-4 py-2.5 text-sm font-bold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-emerald-600"
+                  >
+                    {acceptedRequestIds.includes(String(req._id)) ? 'Response sent' : acceptingId === req._id ? 'Sending…' : 'I can donate'}
+                  </button>
+                )}
               </div>
             ))
           )}
