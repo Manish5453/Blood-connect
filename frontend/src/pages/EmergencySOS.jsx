@@ -6,6 +6,7 @@ const EmergencySOS = () => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState('');
   const [userId, setUserId] = useState('');
+  const [donorBloodGroup, setDonorBloodGroup] = useState('');
   const [showModal, setShowModal] = useState(false);
 
   const [sosForm, setSosForm] = useState({
@@ -37,6 +38,7 @@ const EmergencySOS = () => {
         const parsed = JSON.parse(userInfo);
         setUserRole(parsed.role);
         setUserId(parsed._id);
+        setDonorBloodGroup(parsed.bloodGroup || '');
         setSosForm(prev => ({
           ...prev,
           hospitalName: parsed.name || '',
@@ -48,6 +50,10 @@ const EmergencySOS = () => {
       }
     }
   }, []);
+
+  const visibleAlerts = userRole === 'donor'
+    ? alerts.filter((alert) => alert.status === 'Active' && alert.bloodGroup === donorBloodGroup)
+    : alerts;
 
   const handleChange = (e) => {
     setSosForm({ ...sosForm, [e.target.name]: e.target.value });
@@ -114,7 +120,7 @@ const EmergencySOS = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
 
-      alert('🎉 Thank you! Your response has been logged. The hospital can now track your arrival on the Donor Tracking page.');
+      alert('Thank you! Your response is confirmed. You and the hospital can follow its status from your dashboards.');
     } catch (err) {
       console.error('Error recording donor commitment:', err.response?.data || err.message);
       alert(err.response?.data?.message || 'Failed to submit commitment.');
@@ -149,13 +155,13 @@ const EmergencySOS = () => {
         {/* Alerts List */}
         {loading ? (
           <div className="text-center py-20 text-gray-500 font-medium animate-pulse">Loading emergency alerts...</div>
-        ) : alerts.length === 0 ? (
+        ) : visibleAlerts.length === 0 ? (
           <div className="bg-white rounded-2xl p-12 text-center border border-gray-100 shadow-sm">
-            <p className="text-gray-600 font-medium">No active emergency SOS requests right now. All clear!</p>
+            <p className="text-gray-600 font-medium">{userRole === 'donor' ? `No active SOS alerts for ${donorBloodGroup || 'your blood group'} right now.` : 'No active emergency SOS requests right now. All clear!'}</p>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {alerts.map((item) => {
+            {visibleAlerts.map((item) => {
               const isResolved = item.status === 'Resolved';
               const isOwner = userRole === 'hospital' && item.hospital === userId;
 

@@ -32,7 +32,7 @@ const registerUser = async (req, res) => {
       password,
       phone: phone || '',
       role: role || 'donor',
-      bloodGroup: bloodGroup || '',
+      bloodGroup: role === 'hospital' ? 'All' : bloodGroup || '',
       city: city || ''
     });
 
@@ -42,6 +42,8 @@ const registerUser = async (req, res) => {
         name: user.name,
         email: user.email,
         role: user.role,
+        bloodGroup: user.bloodGroup,
+        phone: user.phone,
         city: user.city,
         token: generateToken(user._id),
       });
@@ -80,6 +82,8 @@ const authUser = async (req, res) => {
       name: user.name,
       email: user.email,
       role: user.role,
+      bloodGroup: user.bloodGroup,
+      phone: user.phone,
       city: user.city,
       token: generateToken(user._id),
     });

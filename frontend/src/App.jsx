@@ -13,6 +13,8 @@ import PatientIssuanceLog from './pages/PatientIssuanceLog';
 import DonorTracking from './pages/DonorTracking';
 import AnalyticsDashboard from './pages/AnalyticsDashboard';
 import AdminPortal from './pages/AdminPortal';
+import RoleDashboard from './pages/RoleDashboard';
+import ProtectedRoute from './components/ProtectedRoute';
 
 const AppRoutes = () => {
   const location = useLocation();
@@ -34,6 +36,7 @@ const AppRoutes = () => {
           <Route path="/inventory" element={<Inventory />} />
           <Route path="/issuance-log" element={<PatientIssuanceLog />} />
           <Route path="/donor-tracking" element={<DonorTracking />} />
+          <Route path="/dashboard" element={<ProtectedRoute><RoleDashboard /></ProtectedRoute>} />
           <Route path="/analytics" element={<AnalyticsDashboard />} />
         </Routes>
       </main>

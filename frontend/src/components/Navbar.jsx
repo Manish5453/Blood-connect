@@ -7,7 +7,7 @@ const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [isOpen, setIsOpen] = useState(false);
-  const dashboardPath = user?.role === 'hospital' ? '/analytics' : '/donor-tracking';
+  const dashboardPath = '/dashboard';
 
   const closeMenu = () => setIsOpen(false);
   const handleLogout = () => {
@@ -79,8 +79,7 @@ const Navbar = () => {
               ['Blood Camps', '/camps'],
               ['Dashboard', dashboardPath],
               ['Emergency Requests', '/requests'],
-              ['Donor Tracking', '/donor-tracking'],
-              ...(user?.role === 'hospital' ? [['Issuance Log', '/issuance-log'], ['Analytics', '/analytics']] : []),
+              ...(user?.role === 'hospital' ? [['Donor Tracking', '/donor-tracking'], ['Issuance Log', '/issuance-log'], ['Analytics', '/analytics']] : user?.role === 'donor' ? [['My Responses', '/donor-tracking']] : []),
               ['Emergency SOS', '/emergency-sos'],
             ].map(([label, path]) => (
               <Link key={`${label}-${path}`} to={path} onClick={closeMenu} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-rose-50 hover:text-rose-600">

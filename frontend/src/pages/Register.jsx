@@ -18,7 +18,12 @@ const Register = () => {
   const navigate = useNavigate();
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setFormData((current) => ({
+      ...current,
+      [name]: value,
+      ...(name === 'role' ? { bloodGroup: value === 'hospital' ? 'All' : current.bloodGroup === 'All' ? 'A+' : current.bloodGroup } : {}),
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -113,16 +118,21 @@ const Register = () => {
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">Blood Group</label>
-              <select 
-                name="bloodGroup" 
-                value={formData.bloodGroup} 
-                onChange={handleChange} 
-                className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
-              >
-                {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
-                  <option key={bg} value={bg}>{bg}</option>
-                ))}
-              </select>
+              {formData.role === 'hospital' ? (
+                <div className="w-full rounded-xl border border-rose-200 bg-rose-50 px-3 py-2.5 font-semibold text-rose-700">All blood groups</div>
+              ) : (
+                <select
+                  name="bloodGroup"
+                  value={formData.bloodGroup}
+                  onChange={handleChange}
+                  required
+                  className="w-full px-3 py-2.5 border border-gray-300 rounded-xl text-gray-900 focus:ring-2 focus:ring-red-500 focus:outline-none bg-white"
+                >
+                  {['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'].map(bg => (
+                    <option key={bg} value={bg}>{bg}</option>
+                  ))}
+                </select>
+              )}
             </div>
             <div>
               <label className="block text-sm font-semibold text-gray-700 mb-1">City</label>

@@ -13,7 +13,9 @@ const getCommitments = async (req, res) => {
     } else {
       return res.status(403).json({ message: 'Only donors and hospitals can view donor tracking.' });
     }
-    const commitments = await DonorCommitment.find(query).sort({ createdAt: -1 });
+    const commitments = await DonorCommitment.find(query)
+      .populate('donor', 'name email phone city bloodGroup')
+      .sort({ createdAt: -1 });
     res.json(commitments);
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -45,6 +47,9 @@ const createCommitment = async (req, res) => {
     } else if (sosId) {
       const alert = await SOSAlert.findOne({ _id: sosId, status: 'Active' });
       if (!alert) return res.status(404).json({ message: 'This emergency alert is no longer active.' });
+      if (alert.bloodGroup !== req.user.bloodGroup) {
+        return res.status(403).json({ message: `This SOS is for ${alert.bloodGroup} donors. Your registered group is ${req.user.bloodGroup || 'not set'}.` });
+      }
       details = {
         hospital: alert.hospital,
         hospitalName: alert.hospitalName,

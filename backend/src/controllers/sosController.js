@@ -13,6 +13,9 @@ const getSOSAlerts = async (req, res) => {
 // Create SOS broadcast (Hospital only)
 const createSOSAlert = async (req, res) => {
   try {
+    if (!req.user || req.user.role !== 'hospital') {
+      return res.status(403).json({ message: 'Only hospital accounts can broadcast an emergency SOS.' });
+    }
     const { bloodGroup, unitsNeeded, city, contactPhone, message, hospitalName } = req.body;
 
     if (!bloodGroup || !unitsNeeded || !city || !contactPhone || !message) {
