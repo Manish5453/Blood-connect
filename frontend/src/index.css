@@ -1,1 +1,42 @@
 @import "tailwindcss";
+
+@keyframes bloodconnect-ticker {
+  from { transform: translateX(0); }
+  to { transform: translateX(-33.3333%); }
+}
+
+@keyframes bloodconnect-activity {
+  from { transform: translateX(0); }
+  to { transform: translateX(calc(-50% - 0.5rem)); }
+}
+
+.ticker-viewport {
+  overflow: hidden;
+  mask-image: linear-gradient(to right, transparent, black 3%, black 97%, transparent);
+}
+
+.ticker-track {
+  animation: bloodconnect-ticker 30s linear infinite;
+}
+
+.activity-track {
+  animation: bloodconnect-activity 48s linear infinite;
+}
+
+.ticker-viewport:hover .ticker-track,
+.ticker-viewport:focus-within .ticker-track {
+  animation-play-state: paused;
+}
+
+.activity-viewport:hover .activity-track,
+.activity-viewport:focus-within .activity-track {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticker-track,
+  .activity-track {
+    animation: none;
+    transform: none;
+  }
+}

@@ -1,267 +1,103 @@
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import {
-  HeartPulse,
-  LogOut,
-  User,
-  Menu,
-  X,
-  AlertTriangle,
-  Calendar,
-  ClipboardList,
-  Truck,
-  BarChart2,
-} from "lucide-react";
+import { useState } from 'react';
+import { Link, NavLink, useNavigate } from 'react-router-dom';
+import { AlertCircle, CalendarDays, Droplets, LogOut, Menu, X } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [isOpen, setIsOpen] = React.useState(false);
+  const [isOpen, setIsOpen] = useState(false);
+  const dashboardPath = user?.role === 'hospital' ? '/analytics' : '/donor-tracking';
 
+  const closeMenu = () => setIsOpen(false);
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    closeMenu();
+    navigate('/login');
   };
 
+  const desktopLinkClass = ({ isActive }) =>
+    `relative whitespace-nowrap px-1 py-2 text-sm font-semibold transition ${isActive ? 'text-rose-600 after:absolute after:inset-x-0 after:-bottom-1 after:h-0.5 after:rounded-full after:bg-rose-600' : 'text-slate-600 hover:text-rose-600'}`;
+
   return (
-    <nav className="bg-white shadow-md sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between h-16">
-          <div className="flex items-center">
-            <Link to="/" className="flex items-center space-x-2">
-              <HeartPulse className="h-8 w-8 text-blood-600 animate-pulse" />
-              <span className="text-xl font-bold text-gray-800">
-                Blood<span className="text-blood-600">Connect</span>
-              </span>
-            </Link>
+    <nav className="sticky top-0 z-50 border-b border-slate-100 bg-white/95 shadow-sm backdrop-blur">
+      <div className="mx-auto max-w-[90rem] px-4 sm:px-6 lg:px-8">
+        <div className="flex h-[74px] items-center justify-between gap-4 sm:h-20">
+          <Link to="/" onClick={closeMenu} className="flex shrink-0 items-center gap-2.5">
+            <span className="flex h-11 w-11 items-center justify-center rounded-2xl bg-rose-50 shadow-sm shadow-rose-100">
+              <Droplets className="h-6 w-6 text-rose-600" />
+            </span>
+            <span className="text-xl font-extrabold tracking-tight sm:text-2xl">
+              <span className="text-rose-600">Blood</span><span className="text-slate-900">Connect</span>
+            </span>
+          </Link>
+
+          <div className="hidden items-center gap-5 xl:flex 2xl:gap-7">
+            <NavLink to="/" className={desktopLinkClass}>Home</NavLink>
+            <NavLink to="/inventory" className={desktopLinkClass}>Hospitals</NavLink>
+            <NavLink to="/donors" className={desktopLinkClass}>Donation</NavLink>
+            <NavLink to="/camps" className={desktopLinkClass}>Blood Camps</NavLink>
+            <NavLink to={dashboardPath} className={desktopLinkClass}>Dashboard</NavLink>
           </div>
 
-          {/* Desktop Menu */}
-          <div className="hidden md:flex items-center space-x-6">
-            <Link
-              to="/"
-              className="text-gray-600 hover:text-blood-600 font-medium"
-            >
-              Home
+          <div className="hidden shrink-0 items-center gap-3 xl:flex">
+            <Link to="/emergency-sos" className="inline-flex items-center gap-2 whitespace-nowrap rounded-xl border border-rose-100 bg-rose-50 px-4 py-3 text-sm font-bold text-rose-600 transition hover:border-rose-200 hover:bg-rose-100">
+              <AlertCircle className="h-4 w-4" /> Emergency
             </Link>
-            <Link
-              to="/donors"
-              className="text-gray-600 hover:text-blood-600 font-medium"
-            >
-              Find Donors
-            </Link>
-            <Link
-              to="/requests"
-              className="text-gray-600 hover:text-blood-600 font-medium"
-            >
-              Emergency Requests
-            </Link>
-            <Link
-              to="/inventory"
-              className="text-gray-600 hover:text-blood-600 font-medium"
-            >
-              Blood Stock
-            </Link>
-
-            <Link
-              to="/camps"
-              className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-            >
-              <Calendar className="h-4 w-4" /> Donation Camps
-            </Link>
-
-            {/* Donor Tracking Link */}
-            <Link
-              to="/donor-tracking"
-              className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-            >
-              <Truck className="h-4 w-4" /> Donor Tracking
-            </Link>
-
-            {/* Issuance Log & Analytics link ONLY for Hospital role */}
-            {user?.role === "hospital" && (
-              <>
-                <Link
-                  to="/issuance-log"
-                  className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-                >
-                  <ClipboardList className="h-4 w-4" /> Issuance Log
-                </Link>
-                <Link
-                  to="/analytics"
-                  className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-                >
-                  <BarChart2 className="h-4 w-4" /> Analytics
-                </Link>
-              </>
-            )}
-
-            {/* Emergency SOS Link */}
-            <Link
-              to="/emergency-sos"
-              className="flex items-center gap-1 text-red-600 hover:text-red-700 font-bold animate-pulse"
-            >
-              <AlertTriangle className="h-4 w-4" /> Emergency SOS
-            </Link>
-
             {user ? (
-              <div className="flex items-center space-x-4 border-l pl-4">
-                <span className="text-sm font-semibold text-gray-700 flex items-center gap-1">
-                  <User className="h-4 w-4 text-blood-600" /> {user.name} (
-                  {user.role})
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1 bg-blood-50 text-blood-600 px-3 py-1.5 rounded-lg hover:bg-blood-100 transition font-medium text-sm"
-                >
+              <>
+                <span className="max-w-40 truncate border-l border-slate-200 pl-4 text-sm font-medium text-slate-600">{user.name}</span>
+                <button onClick={handleLogout} className="inline-flex items-center gap-2 rounded-xl bg-rose-600 px-4 py-3 text-sm font-bold text-white shadow-md shadow-rose-600/20 transition hover:bg-rose-700">
                   <LogOut className="h-4 w-4" /> Logout
                 </button>
-              </div>
+              </>
             ) : (
-              <div className="flex items-center space-x-3 border-l pl-4">
-                <Link
-                  to="/login"
-                  className="text-blood-600 font-medium hover:underline"
-                >
-                  Login
-                </Link>
-                <Link
-                  to="/register"
-                  className="bg-blood-600 text-white px-4 py-2 rounded-lg hover:bg-blood-700 transition font-medium"
-                >
-                  Register
-                </Link>
-              </div>
+              <>
+                <Link to="/login" className="rounded-xl border border-slate-200 px-5 py-3 text-sm font-bold text-slate-700 transition hover:border-rose-200 hover:text-rose-600">Login</Link>
+                <Link to="/register" className="whitespace-nowrap rounded-xl bg-linear-to-r from-rose-600 to-red-700 px-5 py-3 text-sm font-bold text-white shadow-md shadow-rose-600/20 transition hover:-translate-y-0.5 hover:from-rose-700 hover:to-red-800">Join as Donor</Link>
+              </>
             )}
           </div>
 
-          {/* Mobile menu button */}
-          <div className="md:hidden flex items-center">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="text-gray-600 focus:outline-none"
-            >
-              {isOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
-            </button>
+          <button
+            type="button"
+            onClick={() => setIsOpen((open) => !open)}
+            aria-label={isOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={isOpen}
+            className="inline-flex h-11 w-11 items-center justify-center rounded-xl border border-slate-200 text-slate-700 transition hover:border-rose-200 hover:text-rose-600 xl:hidden"
+          >
+            {isOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          </button>
+        </div>
+
+        {isOpen && (
+          <div className="space-y-1 border-t border-slate-100 py-3 xl:hidden">
+            {[
+              ['Home', '/'],
+              ['Hospitals', '/inventory'],
+              ['Donation', '/donors'],
+              ['Blood Camps', '/camps'],
+              ['Dashboard', dashboardPath],
+              ['Emergency Requests', '/requests'],
+              ['Donor Tracking', '/donor-tracking'],
+              ...(user?.role === 'hospital' ? [['Issuance Log', '/issuance-log'], ['Analytics', '/analytics']] : []),
+              ['Emergency SOS', '/emergency-sos'],
+            ].map(([label, path]) => (
+              <Link key={`${label}-${path}`} to={path} onClick={closeMenu} className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-rose-50 hover:text-rose-600">
+                {label === 'Blood Camps' ? <CalendarDays className="h-4 w-4" /> : null}{label}
+              </Link>
+            ))}
+            {user ? (
+              <button onClick={handleLogout} className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-rose-50 px-3 py-2.5 text-sm font-bold text-rose-600"><LogOut className="h-4 w-4" /> Logout</button>
+            ) : (
+              <div className="grid grid-cols-2 gap-2 border-t border-slate-100 pt-3">
+                <Link to="/login" onClick={closeMenu} className="rounded-lg border border-slate-200 px-3 py-2.5 text-center text-sm font-bold text-slate-700">Login</Link>
+                <Link to="/register" onClick={closeMenu} className="rounded-lg bg-rose-600 px-3 py-2.5 text-center text-sm font-bold text-white">Join as Donor</Link>
+              </div>
+            )}
           </div>
-        </div>
+        )}
       </div>
-
-      {/* Mobile Menu Dropdown */}
-      {isOpen && (
-        <div className="md:hidden bg-white border-t px-4 pt-2 pb-4 space-y-3">
-          <Link
-            to="/"
-            onClick={() => setIsOpen(false)}
-            className="block text-gray-600 hover:text-blood-600 font-medium"
-          >
-            Home
-          </Link>
-          <Link
-            to="/donors"
-            onClick={() => setIsOpen(false)}
-            className="block text-gray-600 hover:text-blood-600 font-medium"
-          >
-            Find Donors
-          </Link>
-          <Link
-            to="/requests"
-            onClick={() => setIsOpen(false)}
-            className="block text-gray-600 hover:text-blood-600 font-medium"
-          >
-            Emergency Requests
-          </Link>
-          <Link
-            to="/inventory"
-            onClick={() => setIsOpen(false)}
-            className="block text-gray-600 hover:text-blood-600 font-medium"
-          >
-            Blood Stock
-          </Link>
-
-          <Link
-            to="/camps"
-            onClick={() => setIsOpen(false)}
-            className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-          >
-            <Calendar className="h-4 w-4" /> Donation Camps
-          </Link>
-
-          <Link
-            to="/donor-tracking"
-            onClick={() => setIsOpen(false)}
-            className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-          >
-            <Truck className="h-4 w-4" /> Donor Tracking
-          </Link>
-
-          {user?.role === "hospital" && (
-            <>
-              <Link
-                to="/issuance-log"
-                onClick={() => setIsOpen(false)}
-                className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-              >
-                <ClipboardList className="h-4 w-4" /> Issuance Log
-              </Link>
-              <Link
-                to="/analytics"
-                onClick={() => setIsOpen(false)}
-                className="text-gray-600 hover:text-blood-600 font-medium flex items-center gap-1"
-              >
-                <BarChart2 className="h-4 w-4" /> Analytics
-              </Link>
-            </>
-          )}
-
-          <Link
-            to="/emergency-sos"
-            onClick={() => setIsOpen(false)}
-            className="flex items-center gap-1 text-red-600 font-bold"
-          >
-            <AlertTriangle className="h-4 w-4" /> Emergency SOS
-          </Link>
-
-          {user ? (
-            <div className="pt-2 border-t">
-              <p className="text-sm font-semibold text-gray-700 mb-2">
-                Logged in as {user.name}
-              </p>
-              <button
-                onClick={() => {
-                  handleLogout();
-                  setIsOpen(false);
-                }}
-                className="w-full flex items-center justify-center gap-1 bg-blood-50 text-blood-600 py-2 rounded-lg font-medium"
-              >
-                <LogOut className="h-4 w-4" /> Logout
-              </button>
-            </div>
-          ) : (
-            <div className="flex gap-2 pt-2 border-t">
-              <Link
-                to="/login"
-                onClick={() => setIsOpen(false)}
-                className="w-1/2 text-center py-2 border border-blood-600 text-blood-600 rounded-lg font-medium"
-              >
-                Login
-              </Link>
-              <Link
-                to="/register"
-                onClick={() => setIsOpen(false)}
-                className="w-1/2 text-center py-2 bg-blood-600 text-white rounded-lg font-medium"
-              >
-                Register
-              </Link>
-            </div>
-          )}
-        </div>
-      )}
     </nav>
   );
 };
