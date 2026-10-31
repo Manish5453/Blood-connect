@@ -1,10 +1,7 @@
 import axios from 'axios';
 
 const API = axios.create({
-  // Keep production requests on the active Vercel domain and proxy them to Render.
-  baseURL: import.meta.env.DEV
-    ? (import.meta.env.VITE_API_URL || 'http://localhost:5001/api')
-    : '/api',
+  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5001/api',
 });
 
 // Automatically attach JWT token to every request

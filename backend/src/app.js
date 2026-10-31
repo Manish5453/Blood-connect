@@ -16,23 +16,11 @@ const { notFound, errorHandler } = require('./middlewares/errorMiddleware');
 const app = express();
 
 // Global Middlewares
-const allowedOrigins = new Set([
-  'http://localhost:5173',
-  'http://127.0.0.1:5173',
-  'https://life-connect-ten.vercel.app',
-  process.env.FRONTEND_URL,
-].filter(Boolean));
-
-const vercelFrontendOrigin = /^https:\/\/blood-connect(?:-[a-z0-9-]+)?-(?:ten|my-project-2606)\.vercel\.app$/i;
-const lifeConnectVercelOrigin = /^https:\/\/life-connect(?:-[a-z0-9-]+)?\.vercel\.app$/i;
-
 const corsOptions = {
-  origin(origin, callback) {
-    if (!origin || allowedOrigins.has(origin) || vercelFrontendOrigin.test(origin) || lifeConnectVercelOrigin.test(origin)) {
-      return callback(null, true);
-    }
-    return callback(null, false);
-  },
+  origin: [
+    'http://localhost:5173',
+    'http://127.0.0.1:5173',
+  ],
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],
 };
