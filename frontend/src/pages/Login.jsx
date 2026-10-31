@@ -20,8 +20,12 @@ const Login = () => {
       navigate('/');
       window.location.reload(); 
     } catch (err) {
-      console.error('Login error:', err.response?.data);
-      alert(err.response?.data?.message || 'Login failed! Please check your credentials.');
+      console.error('Login request failed:', err.response?.data || err.message);
+      if (!err.response) {
+        alert('Login server se connect nahi ho pa raha. Backend URL, CORS, aur backend deployment check karein.');
+        return;
+      }
+      alert(err.response.data?.message || `Login failed (HTTP ${err.response.status}). Please try again.`);
     }
   };
 
