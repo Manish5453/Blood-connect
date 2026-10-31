@@ -32,7 +32,10 @@ const Register = () => {
       await register(formData);
       navigate('/');
     } catch (err) {
-      setError(err.response?.data?.message || 'Registration failed');
+      const message = err.response?.data?.message;
+      setError(message || (err.request
+        ? 'Cannot reach the server. Make sure the BloodConnect backend is running.'
+        : err.message || 'Registration failed'));
     }
   };
 
